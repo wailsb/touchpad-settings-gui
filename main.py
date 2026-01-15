@@ -13,8 +13,8 @@ def runCmd(command,callback,WinObj):
 
     callback(WinObj,os.popen(command).read())
 class ThreadMg:
-    def __init__(self):
-        self.cmdsList={"list":"xinput list"}
+    def __init__(self,globale):
+        self.cmdsList={"list":"xinput list","increase":f"xinput set-prop 11 \"libinput Accel Speed\" {globale}","decrease":f"xinput set-prop 11 \"libinput Accel Speed\" {globale}"}
         self.ThreadPool=[]
     def appendThread(self,thread):
         self.ThreadPool.append(thread)
@@ -29,27 +29,42 @@ class ThreadMg:
 class TouchPadManager:
     def __init__(self):
         self.devices=""
-        ThreadManager = ThreadMg()
+        self.speed=0.6
+        ThreadManager = ThreadMg(self.speed)
         ThreadManager.ThreadGen("list",testcallback,self)
         ThreadManager.ExecThs()
-        print("init done")
-        print(self.devices)
+    def applyNewVal(self):
+        ThreadManager = ThreadMg(self.speed)
+        ThreadManager.ThreadGen("increase",testcallback,self)
+        ThreadManager.ExecThs()
 class MyWindow(Gtk.Window):
     def __init__(self):
 
         super().__init__(title="Hello World")
-        Touchpad=TouchPadManager()
+        self.Touchpad=TouchPadManager()
 
-        self.button = Gtk.Button(label="Click Here")
+        self.buttonMin = Gtk.Button(label="-5%")
 
-        self.button.connect("clicked", self.on_button_clicked)
+        self.buttonMin.connect("clicked",self.on_button_clicked)
 
-        self.add(self.button)
 
+        self.buttonAdd = Gtk.Button(label="+5%")
+
+        self.buttonMin.connect("clicked",self.on_button_clicked2)
+        self.add(self.buttonMin)
+        self.add(self.buttonAdd)
 
     def on_button_clicked(self, widget):
+        if (self.Touchpad.speed==1):
+            self.Touchpad.speed=0
+            return
+        self.Touchpad.speed+=0.05
+    def on_button_clicked2(self, widget):
+        if (self.Touchpad.speed==0):
+            self.Touchpad.speed=1
+            return
+        self.Touchpad.speed-=0.05
 
-        print("Hello World")
 
 
 
